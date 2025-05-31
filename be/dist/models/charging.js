@@ -5,13 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const ChargingSchema = new mongoose_1.default.Schema({
-    name: {
+    createrUsername: {
+        type: String,
+        require: true,
+    },
+    stationName: {
         type: String,
         required: true,
+        unique: true,
     },
     location: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: Number, required: true, unique: true },
+        longitude: { type: Number, required: true, unique: true },
     },
     status: {
         type: String,
@@ -28,7 +33,8 @@ const ChargingSchema = new mongoose_1.default.Schema({
         required: true,
     },
     createdBy: {
-        type: String, // or mongoose.Schema.Types.ObjectId if using ref to user
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
 });

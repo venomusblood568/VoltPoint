@@ -1,13 +1,18 @@
 import mongoose from "mongoose";
 
 const ChargingSchema = new mongoose.Schema({
-  name: {
+  createrUsername: {
+    type: String,
+    require: true,
+  },
+  stationName: {
     type: String,
     required: true,
+    unique: true,
   },
   location: {
-    latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true },
+    latitude: { type: Number, required: true, unique: true },
+    longitude: { type: Number, required: true, unique: true },
   },
   status: {
     type: String,
@@ -23,8 +28,9 @@ const ChargingSchema = new mongoose.Schema({
     enum: ["Type1", "Type2"],
     required: true,
   },
-  createdBy: {
-    type: String, // or mongoose.Schema.Types.ObjectId if using ref to user
+  createdBy: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
 });
