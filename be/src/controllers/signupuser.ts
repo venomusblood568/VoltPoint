@@ -1,14 +1,13 @@
-import express, { Response, Request } from "express";
+import { Response, Request } from "express";
 import { User } from "../models";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
-const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export const signin =  
+export const signup =  
   async (req: Request, res: Response): Promise<void> => {
     const { firstname, lastname, username, password } = req.body;
 
