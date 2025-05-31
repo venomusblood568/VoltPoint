@@ -30,9 +30,13 @@ export const signin = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET as string, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      JWT_SECRET as string,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.status(200).json({ message: "Signin successful", token, user });
   } catch (error) {

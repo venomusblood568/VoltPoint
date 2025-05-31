@@ -25,7 +25,10 @@ export const signup =
         username,
         password: hashedpassword,
       });
-      const token = jwt.sign({ id: newUser._id }, JWT_SECRET as string);
+      const token = jwt.sign(
+        { id: newUser._id},
+        JWT_SECRET as string
+      );
 
       res
         .status(201)

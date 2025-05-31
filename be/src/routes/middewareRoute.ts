@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/protected", middleware, (req:Request, res:Response) => {
   res.status(200).json({
     message: "✅ Access granted to protected route",
-    userId: req.userId,
+    user: req.user,
   });
 });
 

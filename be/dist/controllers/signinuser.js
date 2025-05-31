@@ -38,7 +38,7 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(401).json({ message: "Invalid Credentials" });
             return;
         }
-        const token = jsonwebtoken_1.default.sign({ id: user._id }, JWT_SECRET, {
+        const token = jsonwebtoken_1.default.sign({ id: user._id, username: user.username }, JWT_SECRET, {
             expiresIn: "1h",
         });
         res.status(200).json({ message: "Signin successful", token, user });

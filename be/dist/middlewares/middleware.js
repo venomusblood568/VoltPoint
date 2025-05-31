@@ -14,8 +14,8 @@ const middleware = (req, res, next) => {
     }
     try {
         const token = authHeader.split(" ")[1];
-        const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-        req.userId = decoded.id;
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
         next();
     }
     catch (error) {

@@ -23,6 +23,10 @@ const ChargingSchema = new mongoose.Schema({
     enum: ["Type1", "Type2"],
     required: true,
   },
+  createdBy: {
+    type: String, // or mongoose.Schema.Types.ObjectId if using ref to user
+    required: true,
+  },
 });
 
 const ChargingStation = mongoose.model("ChargingStation", ChargingSchema);
