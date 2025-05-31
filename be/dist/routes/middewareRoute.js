@@ -4,11 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const testRoutes_1 = __importDefault(require("./testRoutes"));
-const authRoute_1 = __importDefault(require("./authRoute"));
-const middewareRoute_1 = __importDefault(require("./middewareRoute"));
+const middleware_1 = require("../middlewares/middleware");
 const router = express_1.default.Router();
-router.use("/", testRoutes_1.default);
-router.use("/middleware", middewareRoute_1.default);
-router.use("/auth", authRoute_1.default);
+// Protected route
+router.get("/protected", middleware_1.middleware, (req, res) => {
+    res.status(200).json({
+        message: "✅ Access granted to protected route",
+        userId: req.userId,
+    });
+});
 exports.default = router;

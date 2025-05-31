@@ -5,7 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
+// Public test route
 router.get("/testroutes", (req, res) => {
-    res.json(200).json("testRoute backend is running");
+    res.status(200).json({ message: "testRoute backend is running" });
 });
 exports.default = router;
