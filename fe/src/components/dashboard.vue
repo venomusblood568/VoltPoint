@@ -7,15 +7,18 @@ const chargers = ref<any[]>([]);
 const mapViewRef = ref();
 const router = useRouter();
 
-function focusOn(charger: any) {
-  mapViewRef.value?.focusOnCharger(charger);
-}
+const username = ref("");
 
-function goToSignIn() {
-  router.push("/signin");
-}
-
+// Check localStorage for username on mount (simulate login state)
 onMounted(async () => {
+  const storedUser = localStorage.getItem("username");
+  if (storedUser) {
+    username.value = storedUser;
+  } else {
+    // Not logged in, redirect to signin
+    router.push("/signin");
+  }
+
   try {
     const res = await fetch("http://localhost:3000/api/v1/station/getstation");
     const data = await res.json();
@@ -24,6 +27,19 @@ onMounted(async () => {
     console.error("Error fetching stations:", error);
   }
 });
+
+function focusOn(charger: any) {
+  mapViewRef.value?.focusOnCharger(charger);
+}
+
+function logout() {
+  localStorage.removeItem("username");
+  router.push("/signin");
+}
+
+function createChargingStation() {
+  router.push("/create-charging-station");
+}
 </script>
 
 <template>
@@ -40,7 +56,7 @@ onMounted(async () => {
           v-for="charger in chargers"
           :key="charger._id?.$oid || charger._id"
           @click="focusOn(charger)"
-          class="cursor-pointer  rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
+          class="cursor-pointer rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
         >
           <p class="font-semibold text-lg truncate">
             {{ charger.stationName || "Unknown Station" }}
@@ -65,13 +81,38 @@ onMounted(async () => {
         </li>
       </ul>
 
-      <!-- Login Button -->
+      <template v-if="username">
+  <div class="w-full mx-auto mt-8 p-4 border border-gray-300 rounded-md flex flex-col gap-4">
+    <!-- Username and Logout on same line -->
+    <div class="flex justify-between items-center">
+      <span class="text-white font-medium">{{ username }}</span>
       <button
-        @click="goToSignIn"
-        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+        @click="logout"
+        class="text-red-500 hover:text-red-700 font-semibold focus:outline-none"
       >
-       Login
+        Logout
       </button>
+    </div>
+
+    <!-- Create Charging Station full width -->
+    <button
+      @click="createChargingStation"
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 rounded-md transition-colors"
+    >
+      Create Charging Station
+    </button>
+  </div>
+</template>
+
+      <!-- If no username, show login button (fallback) -->
+      <template v-else>
+        <button
+          @click="router.push('/signin')"
+          class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Login
+        </button>
+      </template>
     </aside>
 
     <!-- Main Map View -->
@@ -82,7 +123,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* Smooth scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
