@@ -12,9 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteStaion = void 0;
+exports.deleteStation = void 0;
 const charging_1 = __importDefault(require("../models/charging"));
-const deleteStaion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteStation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const { stationName } = req.body;
@@ -39,4 +39,4 @@ const deleteStaion = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(500).json({ message: "Error deleting station", error });
     }
 });
-exports.deleteStaion = deleteStaion;
+exports.deleteStation = deleteStation;

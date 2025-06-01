@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import ChargingStation from "../models/charging";
 
 
-export const deleteStaion = async (req: Request, res: Response) => {
+export const deleteStation = async (req: Request, res: Response) => {
   try {
     const { stationName } = req.body;
     const userId = req.user?.id;
