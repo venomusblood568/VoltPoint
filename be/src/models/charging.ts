@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
 const ChargingSchema = new mongoose.Schema({
-  createrUsername: {
-    type: String,
-    require: true,
-  },
   stationName: {
     type: String,
     required: true,
