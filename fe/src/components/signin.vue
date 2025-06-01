@@ -38,7 +38,7 @@ async function onSubmit() {
     currentUser.value = form.username;
 
     localStorage.setItem("username", form.username);
-    // localStorage.setItem("token", data.token);
+    localStorage.setItem("token", data.token);
 
     setTimeout(() => {
       router.push("/dashboard");
@@ -65,7 +65,9 @@ async function onSubmit() {
         </div>
 
         <div>
-          <label class="block mb-1 text-gray-700" for="username">Username</label>
+          <label class="block mb-1 text-gray-700" for="username"
+            >Username</label
+          >
           <input
             id="username"
             v-model="form.username"
@@ -78,7 +80,9 @@ async function onSubmit() {
         </div>
 
         <div>
-          <label class="block mb-1 text-gray-700" for="password">Password</label>
+          <label class="block mb-1 text-gray-700" for="password"
+            >Password</label
+          >
           <div class="relative">
             <input
               :type="showPassword ? 'text' : 'password'"
@@ -106,6 +110,10 @@ async function onSubmit() {
         >
           {{ loading ? "Signing In..." : "Sign In" }}
         </button>
+        <p class="text-center text-sm text-gray-500 mt-6">
+          Make account ?
+          <a href="/signup" class="text-blue-600 hover:underline">Sign Up</a>
+        </p>
       </form>
     </div>
   </div>

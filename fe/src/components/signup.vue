@@ -131,7 +131,7 @@ async function onSubmit() {
     }
 
     successMessage.value = "Signup successful! Please sign in.";
-    // Optionally redirect: window.location.href = "/signin";
+    window.location.href = "/signin";
   } catch (err: any) {
     errorMessage.value = err.message || "An error occurred";
   } finally {
