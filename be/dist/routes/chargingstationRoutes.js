@@ -11,5 +11,5 @@ const deleteStation_1 = require("../controllers/deleteStation");
 const router = express_1.default.Router();
 router.post("/createstation", middleware_1.middleware, createStation_1.createStation);
 router.get("/getstation", getstation_1.getStations);
-router.post("/deletestation", middleware_1.middleware, deleteStation_1.deleteStaion);
+router.post("/deletestation", middleware_1.middleware, deleteStation_1.deleteStation);
 exports.default = router;

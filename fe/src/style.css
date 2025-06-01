@@ -1,0 +1,4 @@
+@import "tailwindcss";
+.radial-bg {
+  background-image: linear-gradient(90deg, hsla(248, 21%, 15%, 1) 0%, hsla(250, 14%, 61%, 1) 100%);
+}
