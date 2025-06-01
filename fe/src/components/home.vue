@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import MapView from "./MapView.vue";
+import { useRouter } from "vue-router";
+import MapView from "./mapView.vue";
 
 const chargers = ref<any[]>([]);
 const mapViewRef = ref();
+const router = useRouter();
 
 function focusOn(charger: any) {
   mapViewRef.value?.focusOnCharger(charger);
+}
+
+function goToSignIn() {
+  router.push("/signin");
 }
 
 onMounted(async () => {
@@ -22,8 +28,11 @@ onMounted(async () => {
 
 <template>
   <div class="h-screen flex">
-    <aside class="w-80 bg-gray-900 text-white p-6 flex flex-col">
+    <!-- Sidebar -->
+    <aside class="w-96 bg-black text-white p-6 flex flex-col">
       <h1 class="text-3xl font-bold mb-6">⚡ Chargers</h1>
+
+      <!-- Charger List -->
       <ul
         class="flex-1 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
       >
@@ -31,7 +40,7 @@ onMounted(async () => {
           v-for="charger in chargers"
           :key="charger._id?.$oid || charger._id"
           @click="focusOn(charger)"
-          class="cursor-pointer bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
+          class="cursor-pointer  rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
         >
           <p class="font-semibold text-lg truncate">
             {{ charger.stationName || "Unknown Station" }}
@@ -55,8 +64,17 @@ onMounted(async () => {
           </p>
         </li>
       </ul>
+
+      <!-- Login Button -->
+      <button
+        @click="goToSignIn"
+        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+      >
+       Login
+      </button>
     </aside>
 
+    <!-- Main Map View -->
     <main class="flex-1">
       <MapView ref="mapViewRef" :chargers="chargers" />
     </main>
