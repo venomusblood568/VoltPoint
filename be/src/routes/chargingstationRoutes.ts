@@ -7,7 +7,7 @@ import { updateStation } from "../controllers/updateStation";
 
 const router = express.Router();
 router.post("/createstation", middleware, createStation);
-router.get("/getstation", getStations);
+router.post("/getstation",getStations)
 router.put("/updatestation/:stationName", middleware, updateStation);
 router.post("/deletestation", middleware, deleteStation);
 
