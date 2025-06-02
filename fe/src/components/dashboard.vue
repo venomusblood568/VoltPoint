@@ -218,7 +218,7 @@ async function deleteStation(charger: any) {
   
   try {
     const response = await fetch("http://localhost:3000/api/v1/station/deletestation", {
-      method: "DELETE",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
