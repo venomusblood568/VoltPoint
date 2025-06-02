@@ -64,9 +64,9 @@
           <li v-for="charger in chargers" :key="charger._id" class="charger-item">
             <div class="station-header">
               <strong>{{ charger.stationName }}</strong>
-              <button 
-                v-if="userId && charger.createdBy === userId" 
-                @click="deleteStation(charger)" 
+              <button
+                v-if="userId && charger.createdBy === userId"
+                @click="deleteStation(charger)"
                 class="delete-btn"
                 title="Delete Station"
               >
@@ -106,7 +106,7 @@ const router = useRouter();
 
 const username = ref("");
 const token = localStorage.getItem("token");
-const userId = ref(localStorage.getItem("userId"));
+const userId = ref("");  // Initialize as empty string and update in onMounted
 
 const showCreateForm = ref(false);
 const form = ref({
@@ -121,22 +121,24 @@ const form = ref({
 onMounted(async () => {
   const storedUser = localStorage.getItem("username");
   const storedUserId = localStorage.getItem("userId");
-  
+
   if (!storedUser || !token || !storedUserId) {
     router.push("/signin");
     return;
   }
-  
+
   username.value = storedUser;
   userId.value = storedUserId;
 
   try {
     const res = await fetch("http://localhost:3000/api/v1/station/getstation");
     const data = await res.json();
-    
-    // Ensure we have an array of stations
-    chargers.value = Array.isArray(data.stations) ? data.stations : 
-                     Array.isArray(data) ? data : [];
+
+    chargers.value = Array.isArray(data.stations)
+      ? data.stations
+      : Array.isArray(data)
+      ? data
+      : [];
   } catch (error) {
     console.error("Error fetching stations:", error);
   }
@@ -152,6 +154,7 @@ function focusOn(charger: any) {
 
 function logout() {
   localStorage.clear();
+  userId.value = "";
   router.push("/signin");
 }
 
@@ -188,17 +191,15 @@ async function submitForm() {
       return;
     }
 
-    // Add createdBy field to new station
     const newStation = {
       ...(data.station || data),
-      createdBy: userId.value
+      createdBy: userId.value,
     };
-    
+
     chargers.value.push(newStation);
     alert("Charging station created successfully!");
     showCreateForm.value = false;
 
-    // Reset form
     form.value = {
       stationName: "",
       latitude: null,
@@ -215,7 +216,7 @@ async function submitForm() {
 
 async function deleteStation(charger: any) {
   if (!confirm("Are you sure you want to delete this charging station?")) return;
-  
+
   try {
     const response = await fetch("http://localhost:3000/api/v1/station/deletestation", {
       method: "POST",
@@ -224,8 +225,8 @@ async function deleteStation(charger: any) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        stationName: charger.stationName
-      })
+        stationName: charger.stationName,
+      }),
     });
 
     if (!response.ok) {
@@ -234,10 +235,8 @@ async function deleteStation(charger: any) {
       return;
     }
 
-    // Remove station from local list
-    chargers.value = chargers.value.filter(c => c._id !== charger._id);
+    chargers.value = chargers.value.filter((c) => c._id !== charger._id);
     alert("Charging station deleted successfully!");
-    
   } catch (error) {
     console.error(error);
     alert("An error occurred while deleting station.");
@@ -246,16 +245,15 @@ async function deleteStation(charger: any) {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
 
 .dashboard-container {
   display: flex;
   height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background-color: #f8f9fb;
 }
 
-/* Sidebar styling */
 .sidebar {
   width: 340px;
   background-color: #ffffff;
@@ -263,68 +261,52 @@ async function deleteStation(charger: any) {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  gap: 1rem;
 }
 
 .sidebar header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.sidebar h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
 }
 
 .logout-btn {
-  background: transparent;
+  background-color: #d32f2f;
   border: none;
-  color: #d9534f;
-  font-weight: 600;
+  color: white;
+  padding: 0.4rem 0.8rem;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  transition: color 0.2s;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 .logout-btn:hover {
-  color: #c9302c;
+  background-color: #b71c1c;
 }
 
 .toggle-form-btn {
-  margin-bottom: 1rem;
-  background-color: #4f46e5;
+  background-color: #1976d2;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 5px;
   cursor: pointer;
+  border-radius: 4px;
   font-weight: 600;
   transition: background-color 0.3s ease;
 }
 .toggle-form-btn:hover {
-  background-color: #4338ca;
+  background-color: #1565c0;
 }
 
 .form-popup {
-  background: #f0f4ff;
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
-  box-shadow: inset 0 0 10px #a0b9ff44;
-}
-
-.form-popup h3 {
-  margin-bottom: 1rem;
-  font-weight: 700;
-  color: #333;
+  background-color: #f1f1f1;
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   display: flex;
   flex-direction: column;
 }
@@ -332,113 +314,106 @@ async function deleteStation(charger: any) {
 .form-group label {
   margin-bottom: 0.3rem;
   font-weight: 600;
-  color: #555;
 }
 
 .form-group input,
 .form-group select {
   padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  border: 1px solid #cbd5e1;
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 5px #4f46e5aa;
 }
 
 .form-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   justify-content: flex-end;
 }
 
 .form-actions button {
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.1rem;
-  border-radius: 5px;
-  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  border: none;
+  font-weight: 600;
 }
+
+.form-actions button[type="submit"] {
+  background-color: #388e3c;
+  color: white;
+}
+.form-actions button[type="submit"]:hover {
+  background-color: #2e7d32;
+}
+
 .form-actions button[type="button"] {
-  background-color: #999;
+  background-color: #9e9e9e;
+  color: white;
 }
-.form-actions button:hover {
-  background-color: #4338ca;
+.form-actions button[type="button"]:hover {
+  background-color: #757575;
 }
 
 .stations-list {
   flex-grow: 1;
   overflow-y: auto;
-}
-
-.stations-list h3 {
-  margin-bottom: 0.75rem;
-  font-weight: 700;
-  color: #2c3e50;
+  margin-top: 1rem;
 }
 
 .stations-list ul {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
   margin: 0;
 }
 
 .charger-item {
-  background: white;
+  background-color: #ffffff;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
   border-radius: 6px;
-  padding: 0.8rem 1rem;
-  margin-bottom: 0.8rem;
-  box-shadow: 0 2px 6px #00000010;
-  position: relative;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
 }
 
 .station-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .delete-btn {
-  background: transparent;
+  background: none;
   border: none;
-  color: #d9534f;
   cursor: pointer;
+  color: #d32f2f;
   padding: 0;
-  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
 }
+
 .delete-btn:hover {
-  color: #c9302c;
+  color: #b71c1c;
 }
 
 .focus-btn {
   margin-top: 0.5rem;
-  background-color: #10b981;
-  border: none;
+  background-color: #0288d1;
   color: white;
-  font-size: 0.9rem;
-  padding: 0.3rem 0.7rem;
+  border: none;
+  padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.25s ease;
-}
-.focus-btn:hover {
-  background-color: #059669;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
-/* Main map area */
+.focus-btn:hover {
+  background-color: #0277bd;
+}
+
 .map-area {
   flex-grow: 1;
+  background-color: #e6f0fa;
   position: relative;
-  background-color: #e5e7eb;
-  overflow: hidden;
 }
 </style>
