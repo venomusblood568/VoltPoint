@@ -155,7 +155,7 @@ function focusOn(charger: any) {
 function logout() {
   localStorage.clear();
   userId.value = "";
-  router.push("/signin");
+  router.push("/");
 }
 
 async function submitForm() {
