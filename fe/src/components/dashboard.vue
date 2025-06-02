@@ -185,72 +185,113 @@ async function submitForm() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 .dashboard-container {
   display: flex;
   height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9fb;
 }
 
 /* Sidebar styling */
 .sidebar {
-  width: 320px;
-  background-color: #f4f4f4;
-  border-right: 1px solid #ccc;
-  padding: 1rem;
-  overflow-y: auto;
+  width: 340px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
 }
 
 .logout-btn {
-  background-color: #d9534f;
+  background-color: #e74c3c;
   border: none;
   padding: 0.4rem 0.8rem;
   color: white;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
 }
 
 .toggle-form-btn {
   margin-bottom: 1rem;
-  background-color: #0275d8;
+  background-color: #3498db;
   color: white;
   border: none;
-  padding: 0.6rem;
-  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toggle-form-btn:hover {
+  background-color: #2980b9;
 }
 
 .form-popup {
-  background: white;
-  border: 1px solid #aaa;
+  background: #fefefe;
+  border: 1px solid #ddd;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 1.5rem;
+}
+
+.form-popup h3 {
+  margin-top: 0;
   margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #333;
 }
 
 .form-group {
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.3rem;
-  font-weight: bold;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: #444;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #3498db;
 }
 
 .form-actions {
@@ -263,18 +304,28 @@ async function submitForm() {
   flex: 1;
   padding: 0.6rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .form-actions button[type="submit"] {
-  background-color: #5cb85c;
+  background-color: #2ecc71;
   color: white;
 }
 
+.form-actions button[type="submit"]:hover {
+  background-color: #27ae60;
+}
+
 .form-actions button[type="button"] {
-  background-color: #d9534f;
+  background-color: #e74c3c;
   color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #c0392b;
 }
 
 .stations-list {
@@ -283,31 +334,49 @@ async function submitForm() {
 }
 
 .stations-list h3 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
 }
 
 .charger-item {
-  background: white;
-  padding: 0.8rem;
-  margin-bottom: 0.5rem;
-  border-radius: 6px;
-  box-shadow: 0 0 3px rgba(0,0,0,0.1);
+  background: #fafafa;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.charger-item strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
 }
 
 .focus-btn {
   margin-top: 0.5rem;
-  background-color: #0275d8;
+  background-color: #3498db;
   border: none;
   color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.focus-btn:hover {
+  background-color: #2980b9;
 }
 
 /* Main map area */
 .map-area {
   flex-grow: 1;
-  background-color: #e0e0e0;
+  background-color: #e9edf1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,11 +388,12 @@ async function submitForm() {
   width: 100%;
   height: 100%;
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+
 </style>
