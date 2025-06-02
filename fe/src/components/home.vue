@@ -1,11 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import MapView from "./mapView.vue";
 
 const chargers = ref<any[]>([]);
 const mapViewRef = ref();
 const router = useRouter();
+
+// Filters
+const selectedStatus = ref<string | null>(null);
+const minPower = ref<number | null>(null);
+const selectedConnector = ref<string | null>(null);
+
+// Unique filter options
+const uniqueStatuses = computed(() =>
+  Array.from(new Set(chargers.value.map((c) => c.status).filter(Boolean)))
+);
+const uniqueConnectors = computed(() =>
+  Array.from(new Set(chargers.value.map((c) => c.connectorType).filter(Boolean)))
+);
+
+// Filtered chargers based on selected filters
+const filteredChargers = computed(() =>
+  chargers.value.filter((c) => {
+    const statusMatch = !selectedStatus.value || c.status === selectedStatus.value;
+    const powerMatch = !minPower.value || c.powerOutput >= minPower.value;
+    const connectorMatch = !selectedConnector.value || c.connectorType === selectedConnector.value;
+    return statusMatch && powerMatch && connectorMatch;
+  })
+);
 
 function focusOn(charger: any) {
   mapViewRef.value?.focusOnCharger(charger);
@@ -29,18 +52,55 @@ onMounted(async () => {
 <template>
   <div class="h-screen flex">
     <!-- Sidebar -->
-    <aside class="w-96 bg-black text-white p-6 flex flex-col">
-      <h1 class="text-3xl font-bold mb-6">⚡ VoltPoints</h1>
+    <aside class="w-96 bg-white text-black p-6 flex flex-col">
+      <h1 class="text-3xl font-bold mb-4">⚡ VoltPoints</h1>
+
+      <!-- Filters -->
+      <div class="space-y-2 mb-4">
+        <!-- Status Filter -->
+        <select v-model="selectedStatus" class="w-full p-2 border rounded">
+          <option value="">All Statuses</option>
+          <option v-for="status in uniqueStatuses" :key="status" :value="status">
+            {{ status }}
+          </option>
+        </select>
+
+        <!-- Power Output Filter -->
+        <input
+          v-model.number="minPower"
+          type="number"
+          class="w-full p-2 border rounded"
+          placeholder="Min Power Output (kW)"
+        />
+
+        <!-- Connector Type Filter -->
+        <select v-model="selectedConnector" class="w-full p-2 border rounded">
+          <option value="">All Connectors</option>
+          <option v-for="type in uniqueConnectors" :key="type" :value="type">
+            {{ type }}
+          </option>
+        </select>
+
+        <!-- Clear Filters Button -->
+        <button
+          @click="
+            selectedStatus = null;
+            minPower = null;
+            selectedConnector = null;
+          "
+          class="w-full bg-gray-200 hover:bg-gray-300 text-black py-2 px-4 rounded"
+        >
+          Clear Filters
+        </button>
+      </div>
 
       <!-- Charger List -->
-      <ul
-        class="flex-1 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
-      >
+      <ul class="flex-1 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
         <li
-          v-for="charger in chargers"
+          v-for="charger in filteredChargers"
           :key="charger._id?.$oid || charger._id"
           @click="focusOn(charger)"
-          class="cursor-pointer  rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
+          class="cursor-pointer rounded-lg p-4 hover:bg-gray-500 transition-shadow shadow-sm"
         >
           <p class="font-semibold text-lg truncate">
             {{ charger.stationName || "Unknown Station" }}
@@ -70,27 +130,26 @@ onMounted(async () => {
         @click="goToSignIn"
         class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
       >
-       Login
+        Login
       </button>
     </aside>
 
     <!-- Main Map View -->
     <main class="flex-1">
-      <MapView ref="mapViewRef" :chargers="chargers" />
+      <MapView ref="mapViewRef" :chargers="filteredChargers" />
     </main>
   </div>
 </template>
 
 <style scoped>
-/* Smooth scrollbar styling */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #4b5563; /* gray-700 */
+  background-color: #4b5563;
   border-radius: 3px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
-  background-color: #1f2937; /* gray-900 */
+  background-color: #1f2937;
 }
 </style>
