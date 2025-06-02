@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-600">
     <div class="max-w-md w-full p-6 bg-white rounded-2xl shadow-md flex flex-col items-center justify-center">
-      <h2 class="text-2xl font-bold text-center mb-6">🔐 Sign In</h2>
+      <h2 class="text-2xl font-bold text-center mb-6"> Sign In</h2>
 
       <form @submit.prevent="onSubmit" class="w-full space-y-5">
         <div>
