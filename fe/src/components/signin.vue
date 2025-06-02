@@ -1,7 +1,36 @@
+<template>
+  <div class="signin-container">
+    <h2>Sign In</h2>
+    <form @submit.prevent="onSubmit">
+      <div>
+        <label for="username">Username:</label>
+        <input v-model="form.username" id="username" required />
+      </div>
+
+      <div>
+        <label for="password">Password:</label>
+        <input
+          :type="showPassword ? 'text' : 'password'"
+          v-model="form.password"
+          id="password"
+          required
+        />
+        <button type="button" @click="showPassword = !showPassword">
+          {{ showPassword ? "Hide" : "Show" }}
+        </button>
+      </div>
+
+      <button type="submit" :disabled="loading">Sign In</button>
+    </form>
+
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="success">{{ successMessage }}</p>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { Eye, EyeOff } from "lucide-vue-next";
 
 const form = reactive({
   username: "",
@@ -12,8 +41,6 @@ const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
-const loggedIn = ref(false);
-const currentUser = ref("");
 
 const router = useRouter();
 
@@ -34,15 +61,13 @@ async function onSubmit() {
     if (!response.ok) throw new Error(data.message || "Sign in failed");
 
     successMessage.value = "Signed in successfully!";
-    loggedIn.value = true;
-    currentUser.value = form.username;
-
     localStorage.setItem("username", form.username);
     localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.userId);
 
     setTimeout(() => {
       router.push("/dashboard");
-    });
+    }, 1000);
   } catch (err: any) {
     errorMessage.value = err.message || "Something went wrong";
   } finally {
@@ -51,70 +76,18 @@ async function onSubmit() {
 }
 </script>
 
-<template>
-  <div class="min-h-screen radial-bg flex items-center justify-center px-4">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-      <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Sign In</h1>
-
-      <form v-if="!loggedIn" @submit.prevent="onSubmit" class="space-y-5">
-        <div v-if="errorMessage" class="text-red-600 text-sm text-center">
-          {{ errorMessage }}
-        </div>
-        <div v-if="successMessage" class="text-green-600 text-sm text-center">
-          {{ successMessage }}
-        </div>
-
-        <div>
-          <label class="block mb-1 text-gray-700" for="username"
-            >Username</label
-          >
-          <input
-            id="username"
-            v-model="form.username"
-            name="username"
-            type="text"
-            placeholder="john_doe"
-            required
-            class="w-full border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block mb-1 text-gray-700" for="password"
-            >Password</label
-          >
-          <div class="relative">
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              id="password"
-              v-model="form.password"
-              name="password"
-              placeholder="••••••••"
-              required
-              class="w-full border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
-            />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              class="absolute inset-y-0 right-2 pr-3 flex items-center text-gray-600 hover:text-gray-900"
-            >
-              <component :is="showPassword ? EyeOff : Eye" class="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-300 disabled:opacity-50"
-        >
-          {{ loading ? "Signing In..." : "Sign In" }}
-        </button>
-        <p class="text-center text-sm text-gray-500 mt-6">
-          Make account ?
-          <a href="/signup" class="text-blue-600 hover:underline">Sign Up</a>
-        </p>
-      </form>
-    </div>
-  </div>
-</template>
+<style scoped>
+.signin-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.error {
+  color: red;
+}
+.success {
+  color: green;
+}
+</style>

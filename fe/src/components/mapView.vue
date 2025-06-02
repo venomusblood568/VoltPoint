@@ -1,89 +1,88 @@
+<template>
+  <div ref="mapContainer" class="map-container"></div>
+</template>
+
 <script setup lang="ts">
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { onMounted, ref, watch } from 'vue'
+import { ref, onMounted, watch } from "vue";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const props = defineProps<{
-  chargers: {
-    _id: { $oid?: string } | string
-    stationName: string
-    location: { latitude?: number; longitude?: number; coordinates?: number[] }
-  }[]
-}>()
+  chargers: Array<{
+    stationName: string;
+    location: { latitude: number; longitude: number };
+    status: string;
+    powerOutput: number;
+    connectorType: string;
+  }>;
+}>();
 
-const mapElement = ref<HTMLDivElement | null>(null)
-const mapRef = ref<L.Map>()
-const markerMap = new Map<string, L.Marker>()
+const mapContainer = ref<HTMLDivElement | null>(null);
+let map: L.Map | null = null;
+let markersLayer: L.LayerGroup | null = null;
 
-// Helper to get unique ID string
-function getId(charger: any) {
-  if (typeof charger._id === 'string') return charger._id
-  if (charger._id && charger._id.$oid) return charger._id.$oid
-  return JSON.stringify(charger) // fallback (should not happen)
-}
+function updateMarkers() {
+  if (!markersLayer) return;
 
-// Helper to get lat/lng safely
-function getLatLng(charger: any): [number, number] {
-  if (charger.location?.latitude !== undefined && charger.location?.longitude !== undefined) {
-    return [charger.location.latitude, charger.location.longitude]
-  } else if (charger.location?.coordinates && charger.location.coordinates.length === 2) {
-    // GeoJSON coordinates: [lng, lat]
-    return [charger.location.coordinates[1], charger.location.coordinates[0]]
-  }
-  return [0, 0] // fallback location
+  markersLayer.clearLayers();
+
+  props.chargers.forEach((charger) => {
+    if (
+      charger.location?.latitude != null &&
+      charger.location?.longitude != null
+    ) {
+      const marker = L.marker([
+        charger.location.latitude,
+        charger.location.longitude,
+      ]).bindPopup(
+        `<b>${charger.stationName}</b><br>Status: ${charger.status}<br>Power: ${charger.powerOutput} kW<br>Connector: ${charger.connectorType}`
+      );
+      markersLayer.addLayer(marker);
+    }
+  });
 }
 
 onMounted(() => {
-  mapRef.value = L.map(mapElement.value!).setView([20.5937, 78.9629], 5) // Center of India
+  if (mapContainer.value) {
+    map = L.map(mapContainer.value).setView([0, 0], 2);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(mapRef.value)
-})
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    markersLayer = L.layerGroup().addTo(map);
+
+    updateMarkers();
+  }
+});
 
 watch(
   () => props.chargers,
-  (newChargers) => {
-    // Remove existing markers
-    markerMap.forEach((marker) => marker.remove())
-    markerMap.clear()
-
-    newChargers.forEach((charger) => {
-      const [lat, lng] = getLatLng(charger)
-      const status = charger.status ?? 'Unknown'
-      const powerOutput = charger.powerOutput ?? 'N/A'
-      const connectorType = charger.connectorType ?? 'N/A'
-
-      const popupContent = `
-        <b>${charger.stationName}</b><br>
-        Status: ${status}<br>
-        Power Output: ${powerOutput} kW<br>
-        Connector Type: ${connectorType}<br>
-        Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}
-      `
-
-      const marker = L.marker([lat, lng])
-        .addTo(mapRef.value!)
-        .bindPopup(popupContent)
-
-      markerMap.set(getId(charger), marker)
-    })
+  () => {
+    updateMarkers();
   },
-  { immediate: true }
-)
-
+  { deep: true }
+);
 
 function focusOnCharger(charger: any) {
-  const marker = markerMap.get(getId(charger))
-  if (marker) {
-    mapRef.value?.setView(marker.getLatLng(), 13, { animate: true })
-    marker.openPopup()
+  if (map && charger.location) {
+    map.setView(
+      [charger.location.latitude, charger.location.longitude],
+      15,
+      { animate: true }
+    );
   }
 }
 
-defineExpose({ focusOnCharger })
+// expose focusOnCharger method for parent component usage
+defineExpose({ focusOnCharger });
 </script>
 
-<template>
-  <div ref="mapElement" class="w-full h-screen"></div>
-</template>
+<style scoped>
+.map-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+</style>

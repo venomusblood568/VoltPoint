@@ -1,23 +1,114 @@
+<template>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <header>
+        <h2>Welcome, {{ username }}</h2>
+        <button @click="logout" class="logout-btn">Logout</button>
+      </header>
+
+      <button @click="showCreateForm = !showCreateForm" class="toggle-form-btn">
+        {{ showCreateForm ? "Hide" : "Create New Charging Station" }}
+      </button>
+
+      <div v-if="showCreateForm" class="form-popup">
+        <h3>Create Charging Station</h3>
+        <form @submit.prevent="submitForm">
+          <div class="form-group">
+            <label>Station Name:</label>
+            <input v-model="form.stationName" required />
+          </div>
+
+          <div class="form-group">
+            <label>Latitude:</label>
+            <input v-model.number="form.latitude" type="number" step="any" required />
+          </div>
+
+          <div class="form-group">
+            <label>Longitude:</label>
+            <input v-model.number="form.longitude" type="number" step="any" required />
+          </div>
+
+          <div class="form-group">
+            <label>Status:</label>
+            <select v-model="form.status">
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Power Output (kW):</label>
+            <input v-model.number="form.powerOutput" type="number" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label>Connector Type:</label>
+            <select v-model="form.connectorType">
+              <option>Type1</option>
+              <option>Type2</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit">Submit</button>
+            <button type="button" @click="showCreateForm = false">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <section class="stations-list">
+        <h3>Charging Stations</h3>
+        <ul>
+          <li v-if="chargers.length === 0">No charging stations available.</li>
+          <li v-for="charger in chargers" :key="charger._id || charger.stationName" class="charger-item">
+            <strong>{{ charger.stationName }}</strong><br />
+            Status: {{ charger.status }}<br />
+            Power: {{ charger.powerOutput }} kW<br />
+            Connector: {{ charger.connectorType }}
+            <button @click="focusOn(charger)" class="focus-btn">Focus on Map</button>
+          </li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- Main Map View -->
+    <main class="map-area">
+      <MapView ref="mapViewRef" :chargers="chargers" />
+    </main>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import MapView from "./mapView.vue";
+import MapView from "./mapView.vue"; // Import only, no duplicate declaration
 
 const chargers = ref<any[]>([]);
-const mapViewRef = ref();
+const mapViewRef = ref<InstanceType<typeof MapView> | null>(null);
+
 const router = useRouter();
 
 const username = ref("");
+const token = localStorage.getItem("token");
 
-// Check localStorage for username on mount (simulate login state)
+const showCreateForm = ref(false);
+const form = ref({
+  stationName: "",
+  latitude: null as number | null,
+  longitude: null as number | null,
+  status: "Active",
+  powerOutput: null as number | null,
+  connectorType: "Type1",
+});
+
 onMounted(async () => {
   const storedUser = localStorage.getItem("username");
-  if (storedUser) {
-    username.value = storedUser;
-  } else {
-    // Not logged in, redirect to signin
+  if (!storedUser || !token) {
     router.push("/signin");
+    return;
   }
+  username.value = storedUser;
 
   try {
     const res = await fetch("http://localhost:3000/api/v1/station/getstation");
@@ -29,108 +120,210 @@ onMounted(async () => {
 });
 
 function focusOn(charger: any) {
-  mapViewRef.value?.focusOnCharger(charger);
+  if (mapViewRef.value?.focusOnCharger) {
+    mapViewRef.value.focusOnCharger(charger);
+  } else {
+    alert(`Focus on station: ${charger.stationName}`);
+  }
 }
 
 function logout() {
-  localStorage.removeItem("username");
+  localStorage.clear();
   router.push("/signin");
 }
 
-function createChargingStation() {
-  router.push("/create-charging-station");
+async function submitForm() {
+  if (!token) {
+    alert("Please login again.");
+    router.push("/signin");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:3000/api/v1/station/createstation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        stationName: form.value.stationName,
+        location: {
+          latitude: form.value.latitude,
+          longitude: form.value.longitude,
+        },
+        status: form.value.status,
+        powerOutput: form.value.powerOutput,
+        connectorType: form.value.connectorType,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert("Failed to create station: " + (data.message || "Unknown error"));
+      return;
+    }
+
+    chargers.value.push(data.station || data);
+    alert("Charging station created successfully!");
+    showCreateForm.value = false;
+
+    form.value = {
+      stationName: "",
+      latitude: null,
+      longitude: null,
+      status: "Active",
+      powerOutput: null,
+      connectorType: "Type1",
+    };
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while creating station.");
+  }
 }
 </script>
 
-<template>
-  <div class="h-screen flex">
-    <!-- Sidebar -->
-    <aside class="w-96 bg-black text-white p-6 flex flex-col">
-      <h1 class="text-3xl font-bold mb-6">⚡ VoltPoints</h1>
-
-      <!-- Charger List -->
-      <ul
-        class="flex-1 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900"
-      >
-        <li
-          v-for="charger in chargers"
-          :key="charger._id?.$oid || charger._id"
-          @click="focusOn(charger)"
-          class="cursor-pointer rounded-lg p-4 hover:bg-gray-700 transition-shadow shadow-sm"
-        >
-          <p class="font-semibold text-lg truncate">
-            {{ charger.stationName || "Unknown Station" }}
-          </p>
-          <p class="text-sm text-gray-400 truncate">
-            📍
-            {{
-              charger.location?.latitude !== undefined
-                ? charger.location.latitude.toFixed(4)
-                : charger.location?.coordinates
-                ? charger.location.coordinates[1].toFixed(4)
-                : "N/A"
-            }},
-            {{
-              charger.location?.longitude !== undefined
-                ? charger.location.longitude.toFixed(4)
-                : charger.location?.coordinates
-                ? charger.location.coordinates[0].toFixed(4)
-                : "N/A"
-            }}
-          </p>
-        </li>
-      </ul>
-
-      <template v-if="username">
-  <div class="w-full mx-auto mt-8 p-4 border border-gray-300 rounded-md flex flex-col gap-4">
-    <!-- Username and Logout on same line -->
-    <div class="flex justify-between items-center">
-      <span class="text-white font-medium">{{ username }}</span>
-      <button
-        @click="logout"
-        class="text-red-500 hover:text-red-700 font-semibold focus:outline-none"
-      >
-        Logout
-      </button>
-    </div>
-
-    <!-- Create Charging Station full width -->
-    <button
-      @click="createChargingStation"
-      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 rounded-md transition-colors"
-    >
-      Create Charging Station
-    </button>
-  </div>
-</template>
-
-      <!-- If no username, show login button (fallback) -->
-      <template v-else>
-        <button
-          @click="router.push('/signin')"
-          class="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
-        >
-          Login
-        </button>
-      </template>
-    </aside>
-
-    <!-- Main Map View -->
-    <main class="flex-1">
-      <MapView ref="mapViewRef" :chargers="chargers" />
-    </main>
-  </div>
-</template>
-
 <style scoped>
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
 }
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #4b5563; /* gray-700 */
-  border-radius: 3px;
+
+/* Sidebar styling */
+.sidebar {
+  width: 320px;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ccc;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
-.scrollbar-thin::-webkit-scrollbar-track {
-  background-color: #1f2937; /* gray-900 */
+
+.sidebar header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.logout-btn {
+  background-color: #d9534f;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.toggle-form-btn {
+  margin-bottom: 1rem;
+  background-color: #0275d8;
+  color: white;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-popup {
+  background: white;
+  border: 1px solid #aaa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 0.8rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.4rem;
+  box-sizing: border-box;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.form-actions button[type="button"] {
+  background-color: #d9534f;
+  color: white;
+}
+
+.stations-list {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.stations-list h3 {
+  margin-bottom: 0.5rem;
+}
+
+.charger-item {
+  background: white;
+  padding: 0.8rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.1);
+}
+
+.focus-btn {
+  margin-top: 0.5rem;
+  background-color: #0275d8;
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Main map area */
+.map-area {
+  flex-grow: 1;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 </style>
