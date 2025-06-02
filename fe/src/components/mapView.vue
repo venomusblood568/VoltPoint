@@ -37,6 +37,7 @@ function updateMarkers() {
       ]).bindPopup(
         `<b>${charger.stationName}</b><br>Status: ${charger.status}<br>Power: ${charger.powerOutput} kW<br>Connector: ${charger.connectorType}`
       );
+      if (!markersLayer) return;
       markersLayer.addLayer(marker);
     }
   });

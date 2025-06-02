@@ -85,7 +85,7 @@ async function onSubmit() {
   loading.value = true;
 
   try {
-    const response = await fetch("http://localhost:3000/api/v1/auth/signin", {
+    const response = await fetch("https://voltpoint.onrender.com/api/v1/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

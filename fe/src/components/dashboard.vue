@@ -165,26 +165,48 @@ async function submitForm() {
     return;
   }
 
+  // Basic validation
+  if (
+    !form.value.stationName ||
+    form.value.latitude === null ||
+    form.value.longitude === null ||
+    !form.value.powerOutput
+  ) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+
+  const latitude = Number(form.value.latitude);
+  const longitude = Number(form.value.longitude);
+
+  if (isNaN(latitude) || isNaN(longitude)) {
+    alert("Please enter valid latitude and longitude.");
+    return;
+  }
+
   try {
-    const response = await fetch("http://localhost:3000/api/v1/station/createstation", {
+    const payload = {
+      stationName: form.value.stationName,
+      location: { latitude, longitude },
+      status: form.value.status,
+      powerOutput: form.value.powerOutput,
+      connectorType: form.value.connectorType,
+    };
+
+    console.log("Request payload:", payload);
+
+    const response = await fetch("https://voltpoint.onrender.com/api/v1/station/createstation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        stationName: form.value.stationName,
-        location: {
-          latitude: form.value.latitude,
-          longitude: form.value.longitude,
-        },
-        status: form.value.status,
-        powerOutput: form.value.powerOutput,
-        connectorType: form.value.connectorType,
-      }),
+      body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
+
+    console.log("Response:", response, data);
 
     if (!response.ok) {
       alert("Failed to create station: " + (data.message || "Unknown error"));
@@ -209,7 +231,7 @@ async function submitForm() {
       connectorType: "Type1",
     };
   } catch (error) {
-    console.error(error);
+    console.error("Submit form error:", error);
     alert("An error occurred while creating station.");
   }
 }
@@ -218,7 +240,7 @@ async function deleteStation(charger: any) {
   if (!confirm("Are you sure you want to delete this charging station?")) return;
 
   try {
-    const response = await fetch("http://localhost:3000/api/v1/station/deletestation", {
+    const response = await fetch("https://voltpoint.onrender.com/api/v1/station/deletestation", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
