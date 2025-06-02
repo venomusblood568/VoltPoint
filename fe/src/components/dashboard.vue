@@ -61,8 +61,24 @@
         <h3>Charging Stations</h3>
         <ul>
           <li v-if="chargers.length === 0">No charging stations available.</li>
-          <li v-for="charger in chargers" :key="charger._id || charger.stationName" class="charger-item">
-            <strong>{{ charger.stationName }}</strong><br />
+          <li v-for="charger in chargers" :key="charger._id" class="charger-item">
+            <div class="station-header">
+              <strong>{{ charger.stationName }}</strong>
+              <button 
+                v-if="userId && charger.createdBy === userId" 
+                @click="deleteStation(charger)" 
+                class="delete-btn"
+                title="Delete Station"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  <line x1="10" x2="10" y1="11" y2="17"/>
+                  <line x1="14" x2="14" y1="11" y2="17"/>
+                </svg>
+              </button>
+            </div>
             Status: {{ charger.status }}<br />
             Power: {{ charger.powerOutput }} kW<br />
             Connector: {{ charger.connectorType }}
@@ -82,15 +98,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import MapView from "./mapView.vue"; // Import only, no duplicate declaration
+import MapView from "./mapView.vue";
 
 const chargers = ref<any[]>([]);
 const mapViewRef = ref<InstanceType<typeof MapView> | null>(null);
-
 const router = useRouter();
 
 const username = ref("");
 const token = localStorage.getItem("token");
+const userId = ref(localStorage.getItem("userId"));
 
 const showCreateForm = ref(false);
 const form = ref({
@@ -104,16 +120,22 @@ const form = ref({
 
 onMounted(async () => {
   const storedUser = localStorage.getItem("username");
-  if (!storedUser || !token) {
+  const storedUserId = localStorage.getItem("userId");
+  
+  if (!storedUser || !token || !storedUserId) {
     router.push("/signin");
     return;
   }
+  
   username.value = storedUser;
+  userId.value = storedUserId;
 
   try {
     const res = await fetch("http://localhost:3000/api/v1/station/getstation");
     const data = await res.json();
-    chargers.value = data.stations || data || [];
+    
+    chargers.value = Array.isArray(data.stations) ? data.stations : 
+                     Array.isArray(data) ? data : [];
   } catch (error) {
     console.error("Error fetching stations:", error);
   }
@@ -133,7 +155,7 @@ function logout() {
 }
 
 async function submitForm() {
-  if (!token) {
+  if (!token || !userId.value) {
     alert("Please login again.");
     router.push("/signin");
     return;
@@ -165,7 +187,12 @@ async function submitForm() {
       return;
     }
 
-    chargers.value.push(data.station || data);
+    const newStation = {
+      ...(data.station || data),
+      createdBy: userId.value
+    };
+    
+    chargers.value.push(newStation);
     alert("Charging station created successfully!");
     showCreateForm.value = false;
 
@@ -180,6 +207,36 @@ async function submitForm() {
   } catch (error) {
     console.error(error);
     alert("An error occurred while creating station.");
+  }
+}
+
+async function deleteStation(charger: any) {
+  if (!confirm("Are you sure you want to delete this charging station?")) return;
+  
+  try {
+    const response = await fetch("http://localhost:3000/api/v1/station/deletestation", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        stationName: charger.stationName
+      })
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      alert("Failed to delete station: " + (data.message || "Unknown error"));
+      return;
+    }
+
+    chargers.value = chargers.value.filter(c => c._id !== charger._id);
+    alert("Charging station deleted successfully!");
+    
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred while deleting station.");
   }
 }
 </script>
@@ -221,111 +278,102 @@ async function submitForm() {
 }
 
 .logout-btn {
-  background-color: #e74c3c;
+  background: transparent;
   border: none;
-  padding: 0.4rem 0.8rem;
-  color: white;
   cursor: pointer;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s ease-in-out;
 }
 
 .logout-btn:hover {
-  background-color: #c0392b;
+  color: #a71d2a;
 }
 
 .toggle-form-btn {
-  margin-bottom: 1rem;
-  background-color: #3498db;
-  color: white;
+  background-color: #007bff;
   border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 0.65rem 1rem;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .toggle-form-btn:hover {
-  background-color: #2980b9;
+  background-color: #0056b3;
 }
 
 .form-popup {
-  background: #fefefe;
-  border: 1px solid #ddd;
+  background: #f1f3f5;
+  border-radius: 6px;
   padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
 }
 
 .form-popup h3 {
   margin-top: 0;
+  font-weight: 700;
+  color: #222;
   margin-bottom: 1rem;
-  font-size: 1.1rem;
-  color: #333;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-weight: 500;
-  color: #444;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: #555;
 }
 
 .form-group input,
 .form-group select {
-  width: 100%;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.95rem;
+  padding: 0.5rem;
+  font-size: 1rem;
   border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #3498db;
+  border-radius: 4px;
+  outline-offset: 2px;
 }
 
 .form-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
 .form-actions button {
-  flex: 1;
-  padding: 0.6rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .form-actions button[type="submit"] {
-  background-color: #2ecc71;
+  background-color: #28a745;
   color: white;
 }
 
 .form-actions button[type="submit"]:hover {
-  background-color: #27ae60;
+  background-color: #218838;
 }
 
 .form-actions button[type="button"] {
-  background-color: #e74c3c;
+  background-color: #6c757d;
   color: white;
 }
 
 .form-actions button[type="button"]:hover {
-  background-color: #c0392b;
+  background-color: #5a6268;
 }
 
 .stations-list {
@@ -334,66 +382,68 @@ async function submitForm() {
 }
 
 .stations-list h3 {
-  margin-bottom: 0.8rem;
-  font-size: 1.1rem;
-  color: #333;
-  font-weight: 600;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #222;
+}
+
+.stations-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .charger-item {
-  background: #fafafa;
-  padding: 0.9rem 1rem;
-  margin-bottom: 0.8rem;
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-  font-size: 0.95rem;
-  color: #444;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
 }
 
-.charger-item strong {
-  display: block;
-  font-size: 1rem;
-  margin-bottom: 0.3rem;
+.station-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #dc3545;
+  transition: color 0.2s ease-in-out;
+}
+
+.delete-btn:hover {
+  color: #a71d2a;
 }
 
 .focus-btn {
-  margin-top: 0.5rem;
-  background-color: #3498db;
+  align-self: flex-start;
+  background-color: #007bff;
   border: none;
+  padding: 0.35rem 0.6rem;
   color: white;
-  padding: 0.4rem 0.9rem;
-  border-radius: 6px;
-  font-weight: 500;
+  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .focus-btn:hover {
-  background-color: #2980b9;
+  background-color: #0056b3;
 }
 
 /* Main map area */
 .map-area {
   flex-grow: 1;
-  background-color: #e9edf1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  overflow: hidden;
+  background-color: #e6ecf3;
+  position: relative;
 }
-
-.map-placeholder {
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 </style>
