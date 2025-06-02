@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ChargingStation from "../models/charging";
 
-export const getStations = async (req: Request, res: Response) => {
+export const liststation = async (req: Request, res: Response) => {
   try {
     const stations = await ChargingStation.find()
     res.status(200).json({
