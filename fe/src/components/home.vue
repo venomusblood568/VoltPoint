@@ -56,7 +56,7 @@ onMounted(async () => {
       <h1 class="text-3xl font-bold mb-4">⚡ VoltPoints</h1>
 
       <!-- Filters -->
-      <div class="space-y-2 mb-4">
+      <div class="space-y-2 mb-4 ">
         <!-- Status Filter -->
         <select v-model="selectedStatus" class="w-full p-2 border rounded">
           <option value="">All Statuses</option>
@@ -105,6 +105,7 @@ onMounted(async () => {
           <p class="font-semibold text-lg truncate">
             {{ charger.stationName || "Unknown Station" }}
           </p>
+
           <p class="text-sm text-gray-400 truncate">
             📍
             {{
@@ -122,6 +123,12 @@ onMounted(async () => {
                 : "N/A"
             }}
           </p>
+
+          <div class="mt-2 text-sm text-gray-600 space-y-1">
+            <p>Type: {{ charger.connectorType || "N/A" }}</p>
+            <p>Power: {{ charger.powerOutput ? charger.powerOutput + ' kW' : "N/A" }}</p>
+            <p>Status: {{ charger.status || "N/A" }}</p>
+          </div>
         </li>
       </ul>
 
