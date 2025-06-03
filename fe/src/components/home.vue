@@ -7,12 +7,12 @@ const chargers = ref<any[]>([]);
 const mapViewRef = ref();
 const router = useRouter();
 
-// Filters
+
 const selectedStatus = ref<string | null>(null);
 const minPower = ref<number | null>(null);
 const selectedConnector = ref<string | null>(null);
 
-// Unique filter options
+
 const uniqueStatuses = computed(() =>
   Array.from(new Set(chargers.value.map((c) => c.status).filter(Boolean)))
 );
@@ -20,7 +20,7 @@ const uniqueConnectors = computed(() =>
   Array.from(new Set(chargers.value.map((c) => c.connectorType).filter(Boolean)))
 );
 
-// Filtered chargers based on selected filters
+
 const filteredChargers = computed(() =>
   chargers.value.filter((c) => {
     const statusMatch = !selectedStatus.value || c.status === selectedStatus.value;
@@ -41,7 +41,7 @@ function goToSignIn() {
 onMounted(async () => {
   try {
     const res = await fetch("https://voltpoint.onrender.com/api/v1/station/getstation", {
-  method: "POST", // important because the backend expects POST
+  method: "POST", 
 });
     const data = await res.json();
     chargers.value = data.stations || data || [];

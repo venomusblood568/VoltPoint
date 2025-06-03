@@ -21,12 +21,22 @@
 
           <div class="form-group">
             <label>Latitude:</label>
-            <input v-model.number="form.latitude" type="number" step="any" required />
+            <input
+              v-model.number="form.latitude"
+              type="number"
+              step="any"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label>Longitude:</label>
-            <input v-model.number="form.longitude" type="number" step="any" required />
+            <input
+              v-model.number="form.longitude"
+              type="number"
+              step="any"
+              required
+            />
           </div>
 
           <div class="form-group">
@@ -39,7 +49,12 @@
 
           <div class="form-group">
             <label>Power Output (kW):</label>
-            <input v-model.number="form.powerOutput" type="number" min="0" required />
+            <input
+              v-model.number="form.powerOutput"
+              type="number"
+              min="0"
+              required
+            />
           </div>
 
           <div class="form-group">
@@ -52,7 +67,9 @@
 
           <div class="form-actions">
             <button type="submit">Submit</button>
-            <button type="button" @click="showCreateForm = false">Cancel</button>
+            <button type="button" @click="showCreateForm = false">
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -61,7 +78,11 @@
         <h3>Charging Stations</h3>
         <ul>
           <li v-if="chargers.length === 0">No charging stations available.</li>
-          <li v-for="charger in chargers" :key="charger._id" class="charger-item">
+          <li
+            v-for="charger in chargers"
+            :key="charger._id"
+            class="charger-item"
+          >
             <div class="station-header">
               <strong>{{ charger.stationName }}</strong>
               <button
@@ -70,19 +91,31 @@
                 class="delete-btn"
                 title="Delete Station"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18"/>
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                  <line x1="10" x2="10" y1="11" y2="17"/>
-                  <line x1="14" x2="14" y1="11" y2="17"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  <line x1="10" x2="10" y1="11" y2="17" />
+                  <line x1="14" x2="14" y1="11" y2="17" />
                 </svg>
               </button>
             </div>
             Status: {{ charger.status }}<br />
             Power: {{ charger.powerOutput }} kW<br />
             Connector: {{ charger.connectorType }}
-            <button @click="focusOn(charger)" class="focus-btn">Focus on Map</button>
+            <button @click="focusOn(charger)" class="focus-btn">
+              Focus on Map
+            </button>
           </li>
         </ul>
       </section>
@@ -106,7 +139,7 @@ const router = useRouter();
 
 const username = ref("");
 const token = localStorage.getItem("token");
-const userId = ref("");  // Initialize as empty string and update in onMounted
+const userId = ref(""); 
 
 const showCreateForm = ref(false);
 const form = ref({
@@ -131,9 +164,12 @@ onMounted(async () => {
   userId.value = storedUserId;
 
   try {
-    const res = await fetch("https://voltpoint.onrender.com/api/v1/station/getstation", {
-  method: "POST", // important because the backend expects POST
-});
+    const res = await fetch(
+      "https://voltpoint.onrender.com/api/v1/station/getstation",
+      {
+        method: "POST",
+      }
+    );
     const data = await res.json();
 
     chargers.value = Array.isArray(data.stations)
@@ -167,39 +203,50 @@ async function submitForm() {
     return;
   }
 
-  // Validate all required fields
-  if (!form.value.stationName || 
-      form.value.latitude === null || 
-      form.value.longitude === null || 
-      form.value.powerOutput === null) {
+  
+  if (
+    !form.value.stationName ||
+    form.value.latitude === null ||
+    form.value.longitude === null ||
+    form.value.powerOutput === null
+  ) {
     alert("Please fill all required fields");
     return;
   }
 
   try {
-    const response = await fetch("https://voltpoint.onrender.com/api/v1/station/createstation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        stationName: form.value.stationName,
-        location: {
-          latitude: form.value.latitude,
-          longitude: form.value.longitude,
+    const response = await fetch(
+      "https://voltpoint.onrender.com/api/v1/station/createstation",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        status: form.value.status,
-        powerOutput: form.value.powerOutput,
-        connectorType: form.value.connectorType,
-        createdBy: userId.value  // ADDED createdBy FIELD
-      }),
-    });
+        body: JSON.stringify({
+          stationName: form.value.stationName,
+          location: {
+            latitude: form.value.latitude,
+            longitude: form.value.longitude,
+          },
+          status: form.value.status,
+          powerOutput: form.value.powerOutput,
+          connectorType: form.value.connectorType,
+          createdBy: userId.value,
+        }),
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      alert("Failed to create station: " + (data.message || "Unknown error"));
+      alert(
+        "Failed to create station: " +
+          (data.message || "Unknown error") +
+          (data.message?.includes("already exists")
+            ? `\nNote: A station already exists at Latitude or Longitude.`
+            : "")
+      );
       return;
     }
 
@@ -227,19 +274,23 @@ async function submitForm() {
 }
 
 async function deleteStation(charger: any) {
-  if (!confirm("Are you sure you want to delete this charging station?")) return;
+  if (!confirm("Are you sure you want to delete this charging station?"))
+    return;
 
   try {
-    const response = await fetch("https://voltpoint.onrender.com/api/v1/station/deletestation", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        stationName: charger.stationName,
-      }),
-    });
+    const response = await fetch(
+      "https://voltpoint.onrender.com/api/v1/station/deletestation",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          stationName: charger.stationName,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const data = await response.json();
