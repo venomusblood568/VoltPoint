@@ -7,6 +7,7 @@ import { ref, onMounted, watch } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+// Define props
 const props = defineProps<{
   chargers: Array<{
     stationName: string;
@@ -21,9 +22,18 @@ const mapContainer = ref<HTMLDivElement | null>(null);
 let map: L.Map | null = null;
 let markersLayer: L.LayerGroup | null = null;
 
+// Emoji-based marker icon
+const EmojiIcon = L.divIcon({
+  className: "emoji-marker",
+  html: "📍",
+
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
 function updateMarkers() {
   if (!markersLayer) return;
-
   markersLayer.clearLayers();
 
   props.chargers.forEach((charger) => {
@@ -31,13 +41,12 @@ function updateMarkers() {
       charger.location?.latitude != null &&
       charger.location?.longitude != null
     ) {
-      const marker = L.marker([
-        charger.location.latitude,
-        charger.location.longitude,
-      ]).bindPopup(
+      const marker = L.marker(
+        [charger.location.latitude, charger.location.longitude],
+        { icon: EmojiIcon }
+      ).bindPopup(
         `<b>${charger.stationName}</b><br>Status: ${charger.status}<br>Power: ${charger.powerOutput} kW<br>Connector: ${charger.connectorType}`
       );
-      if (!markersLayer) return;
       markersLayer.addLayer(marker);
     }
   });
@@ -53,7 +62,6 @@ onMounted(() => {
     }).addTo(map);
 
     markersLayer = L.layerGroup().addTo(map);
-
     updateMarkers();
   }
 });
@@ -76,7 +84,6 @@ function focusOnCharger(charger: any) {
   }
 }
 
-// expose focusOnCharger method for parent component usage
 defineExpose({ focusOnCharger });
 </script>
 
@@ -85,5 +92,13 @@ defineExpose({ focusOnCharger });
   width: 100%;
   height: 100%;
   border-radius: 8px;
+}
+
+.emoji-marker {
+  font-size: 25px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
