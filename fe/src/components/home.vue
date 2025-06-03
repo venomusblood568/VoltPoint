@@ -40,7 +40,9 @@ function goToSignIn() {
 
 onMounted(async () => {
   try {
-    const res = await fetch("https://voltpoint.onrender.com/api/v1/station/liststation");
+    const res = await fetch("https://voltpoint.onrender.com/api/v1/station/getstation", {
+  method: "POST", // important because the backend expects POST
+});
     const data = await res.json();
     chargers.value = data.stations || data || [];
   } catch (error) {

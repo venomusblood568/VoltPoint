@@ -131,7 +131,9 @@ onMounted(async () => {
   userId.value = storedUserId;
 
   try {
-    const res = await fetch("http://localhost:3000/api/v1/station/getstation");
+    const res = await fetch("https://voltpoint.onrender.com/api/v1/station/getstation", {
+  method: "POST", // important because the backend expects POST
+});
     const data = await res.json();
 
     chargers.value = Array.isArray(data.stations)
