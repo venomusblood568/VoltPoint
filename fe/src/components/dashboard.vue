@@ -112,7 +112,9 @@
             </div>
             Status: {{ charger.status }}<br />
             Power: {{ charger.powerOutput }} kW<br />
-            Connector: {{ charger.connectorType }}
+            Connector: {{ charger.connectorType }}<br/>
+            Latitude: {{ charger.location?.latitude ?? "N/A" }}<br />
+            Longitude: {{ charger.location?.longitude ?? "N/A" }}
             <button @click="focusOn(charger)" class="focus-btn">
               Focus on Map
             </button>
@@ -139,7 +141,7 @@ const router = useRouter();
 
 const username = ref("");
 const token = localStorage.getItem("token");
-const userId = ref(""); 
+const userId = ref("");
 
 const showCreateForm = ref(false);
 const form = ref({
@@ -203,7 +205,6 @@ async function submitForm() {
     return;
   }
 
-  
   if (
     !form.value.stationName ||
     form.value.latitude === null ||
@@ -274,8 +275,7 @@ async function submitForm() {
 }
 
 async function deleteStation(charger: any) {
-  if (!confirm("Are you sure you want to delete this charging station?"))
-    return;
+  if (!confirm("Are you sure you want to delete this charging station?")) return;
 
   try {
     const response = await fetch(
@@ -319,8 +319,8 @@ async function deleteStation(charger: any) {
 
 .sidebar {
   width: 340px;
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
+  background-color: #fff;
+  border-right: 1px solid #ddd;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -331,89 +331,97 @@ async function deleteStation(charger: any) {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
 }
 
 .logout-btn {
-  background-color: #d32f2f;
+  background-color: #e74c3c;
   border: none;
   color: white;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  border-radius: 4px;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
 }
+
 .logout-btn:hover {
-  background-color: #b71c1c;
+  background-color: #c0392b;
 }
 
 .toggle-form-btn {
-  background-color: #1976d2;
-  color: white;
+  background-color: #3498db;
   border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border-radius: 4px;
+  color: white;
   font-weight: 600;
-  transition: background-color 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
 }
+
 .toggle-form-btn:hover {
-  background-color: #1565c0;
+  background-color: #2980b9;
 }
 
 .form-popup {
-  background-color: #f1f1f1;
-  border-radius: 6px;
+  background-color: #f4f6f9;
+  border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+.form-popup h3 {
+  margin-bottom: 1rem;
+}
+
 .form-group {
-  margin-bottom: 0.8rem;
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 0.75rem;
 }
 
 .form-group label {
-  margin-bottom: 0.3rem;
+  display: block;
   font-weight: 600;
+  margin-bottom: 0.3rem;
 }
 
 .form-group input,
 .form-group select {
-  padding: 0.4rem 0.6rem;
-  border: 1px solid #ccc;
+  width: 100%;
+  padding: 0.4rem;
   border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
 }
 
 .form-actions {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .form-actions button {
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  border: none;
+  flex: 1;
+  padding: 0.6rem;
   font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
 }
 
 .form-actions button[type="submit"] {
-  background-color: #388e3c;
+  background-color: #27ae60;
   color: white;
 }
+
 .form-actions button[type="submit"]:hover {
-  background-color: #2e7d32;
+  background-color: #219150;
 }
 
 .form-actions button[type="button"] {
-  background-color: #9e9e9e;
-  color: white;
+  background-color: #e0e0e0;
 }
+
 .form-actions button[type="button"]:hover {
-  background-color: #757575;
+  background-color: #cfcfcf;
 }
 
 .stations-list {
@@ -422,61 +430,55 @@ async function deleteStation(charger: any) {
   margin-top: 1rem;
 }
 
-.stations-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.stations-list h3 {
+  margin-bottom: 0.75rem;
 }
 
 .charger-item {
-  background-color: #ffffff;
-  margin-bottom: 0.75rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
   padding: 0.75rem;
   border-radius: 6px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .station-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
 }
 
 .delete-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #d32f2f;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
+  color: #e74c3c;
 }
 
 .delete-btn:hover {
-  color: #b71c1c;
+  color: #c0392b;
 }
 
 .focus-btn {
+  align-self: flex-start;
   margin-top: 0.5rem;
-  background-color: #0288d1;
-  color: white;
+  background-color: #3498db;
   border: none;
+  color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s ease;
 }
 
 .focus-btn:hover {
-  background-color: #0277bd;
+  background-color: #2980b9;
 }
 
 .map-area {
   flex-grow: 1;
-  background-color: #e6f0fa;
   position: relative;
 }
 </style>
