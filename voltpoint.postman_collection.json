@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "b5dae277-88aa-4a81-bd90-6078884b9f26",
+		"name": "voltpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36030827"
+	},
+	"item": [
+		{
+			"name": "Basic_Setupcheck_route",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"username\": \"johndoe123\",\n  \"password\": \"securePass123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"johndoe123\",\n  \"password\": \"securePass123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/auth/signin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "middleware ",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4M2FlZDQ2Yzk2YWY3ZmQzMGU2MDFhNSIsInVzZXJuYW1lIjoiam9obmRvZTEyMyIsImlhdCI6MTc0ODY5NzE0MywiZXhwIjoxNzQ4NzAwNzQzfQ.WREmzAbpOtO1Ir4WqE6JHeLEGLuSDsNQpev2KeNDIzc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/middleware/protected",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"middleware",
+						"protected"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create charging station",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4M2FlZDQ2Yzk2YWY3ZmQzMGU2MDFhNSIsInVzZXJuYW1lIjoiam9obmRvZTEyMyIsImlhdCI6MTc0ODc3NjI0MywiZXhwIjoxNzQ4Nzc5ODQzfQ.jMsVCbgb_pN7JCXX5NP3FQIgeuwCiHjoFojkhnH-0hk",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"stationName\": \"ChargeHub - Kothrud, Pune\",\n  \"location\": {\n    \"latitude\": 18.5074,\n    \"longitude\": 73.8077\n  },\n  \"status\": \"Active\",\n  \"powerOutput\": 65,\n  \"connectorType\": \"Type1\",\n  \"createdBy\": \"64f1c8a7b6f9d2a111ef9876\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/station/createstation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"station",
+						"createstation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getstaion_info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/v1/station/getstation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"station",
+						"getstation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deletestation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4M2FlZDQ2Yzk2YWY3ZmQzMGU2MDFhNSIsInVzZXJuYW1lIjoiam9obmRvZTEyMyIsImlhdCI6MTc0ODcwOTA2MCwiZXhwIjoxNzQ4NzEyNjYwfQ.ZDG8gUCAn3lXjJOFbrKGx3jCIBg58q-sRs9ym9ZVexM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"stationName\": \"ChargeHub - Andheri West\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/station/deletestation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"station",
+						"deletestation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateinfo",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4M2UyMTE1NDYzMTlmY2I2YThjMTZlNiIsInVzZXJuYW1lIjoiam9obmRvZTEyMyIsImlhdCI6MTc0ODkwMjE2OCwiZXhwIjoxNzQ4OTA1NzY4fQ.ZniM4oDZFjRi02Pqx2NGy39d9fH03V0_Q07QJv_muk8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"location\": {\n    \"latitude\": 15,\n    \"longitude\": 20\n  },\n  \"powerOutput\": 25,\n  \"status\": \"Inactive\",\n  \"connectorType\": \"Type2\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/v1/station/updatestation/sa",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"station",
+						"updatestation",
+						"sa"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
